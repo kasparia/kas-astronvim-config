@@ -31,24 +31,14 @@ vim.lsp.inlay_hint.enable(true)
 vim.keymap.set("n", "<C-b>", "<Cmd>Neotree toggle<CR>")
 vim.keymap.set("i", "<C-b>", "<Cmd>Neotree toggle<CR>")
 
-return {
-  {
-    "simrat39/rust-tools.nvim",
-    ft = { "rust" }, -- Only load for Rust files
-    config = function()
-      require("rust-tools").setup({
-        server = {
-          tools = {
-            inlay_hints = { auto = true }, -- show hints automatically
-          },
-          on_attach = function(_, bufnr)
-            -- Hover actions
-            vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-            -- Code action groups
-            vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-          end,
-        },
-      })
-    end,
-  },
-}
+vim.keymap.set("n", "<C-Up>", "5k")
+vim.keymap.set("n", "<C-Down>", "5j")
+vim.keymap.set("i", "<C-Up>", "<Esc>5k$i")
+vim.keymap.set("i", "<C-Down>", "<Esc>5j$i")
+
+-- Should enable inlay hints but doesn't really work
+vim.lsp.inlay_hint.enable(true)
+
+-- Set status column to show only absolute numbers
+vim.opt.number = true
+vim.opt.relativenumber = false
