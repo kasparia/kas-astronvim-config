@@ -42,7 +42,7 @@ return {
             },    
         },
         server = {
-            standalone = true
+            path = "/home/kasperi/.cargo/bin/rust-analyzer"
         },
       })
     end,

@@ -42,3 +42,22 @@ vim.lsp.inlay_hint.enable(true)
 -- Set status column to show only absolute numbers
 vim.opt.number = true
 vim.opt.relativenumber = false
+
+-- Enable mouse usage
+vim.opt.mouse = "a"
+
+vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>a", { noremap = true, silent = true })
+
+-- Enable telescope shortcuts
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
+vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
+
+-- Helper for goto-line
+vim.keymap.set("n", "<C-g>", ":", { noremap = true })
+
+vim.keymap.set('n', '<C-p>', function()
+  require('telescope.builtin').find_files()
+end, { desc = "Find files" })
