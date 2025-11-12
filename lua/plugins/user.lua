@@ -1,88 +1,166 @@
-if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-
--- You can also add or configure plugins by creating files in this `plugins/` folder
--- PLEASE REMOVE THE EXAMPLES YOU HAVE NO INTEREST IN BEFORE ENABLING THIS FILE
--- Here are some examples:
-
----@type LazySpec
 return {
 
-  -- == Examples of Adding Plugins ==
-
-  "andweeb/presence.nvim",
   {
-    "ray-x/lsp_signature.nvim",
-    event = "BufRead",
-    config = function() require("lsp_signature").setup() end,
+    "nvim-treesitter/nvim-treesitter",
+    optional = true,
+    opts = function(_, opts)
+      -- Ensure that opts.ensure_installed exists and is a table or string "all".
+      if opts.ensure_installed ~= "all" then
+        opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "toml" })
+      end
+    end,
+  },
+  {
+    "williamboman/mason-lspconfig.nvim",
+    optional = true,
+    opts = function(_, opts)
+      opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "taplo" })
+    end,
+  },
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    optional = true,
+    opts = function(_, opts)
+      opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "taplo" })
+    end,
   },
 
-  -- == Examples of Overriding Plugins ==
-
-  -- customize dashboard options
   {
-    "folke/snacks.nvim",
+    "nvim-treesitter/nvim-treesitter",
+    optional = true,
+    opts = function(_, opts)
+      if opts.ensure_installed ~= "all" then
+        opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "rust" })
+      end
+    end,
+  },
+  {
+    "AstroNvim/astrolsp",
+    optional = true,
+    ---@param opts AstroLSPOpts
     opts = {
-      dashboard = {
-        preset = {
-          header = table.concat({
-            " █████  ███████ ████████ ██████   ██████ ",
-            "██   ██ ██         ██    ██   ██ ██    ██",
-            "███████ ███████    ██    ██████  ██    ██",
-            "██   ██      ██    ██    ██   ██ ██    ██",
-            "██   ██ ███████    ██    ██   ██  ██████ ",
-            "",
-            "███    ██ ██    ██ ██ ███    ███",
-            "████   ██ ██    ██ ██ ████  ████",
-            "██ ██  ██ ██    ██ ██ ██ ████ ██",
-            "██  ██ ██  ██  ██  ██ ██  ██  ██",
-            "██   ████   ████   ██ ██      ██",
-          }, "\n"),
+      handlers = { rust_analyzer = false }, -- disable setup of `rust_analyzer`
+      ---@diagnostic disable: missing-fields
+      config = {
+        rust_analyzer = {
+          settings = {
+            ["rust-analyzer"] = {
+              files = {
+                excludeDirs = {
+                  ".direnv",
+                  ".git",
+                  "target",
+                },
+              },
+              check = {
+                command = "clippy",
+                extraArgs = {
+                  "--no-deps",
+                },
+              },
+            },
+          },
         },
       },
     },
   },
-
-  -- You can disable default plugins as follows:
-  { "max397574/better-escape.nvim", enabled = false },
-
-  -- You can also easily customize additional setup of plugins that is outside of the plugin's setup call
   {
-    "L3MON4D3/LuaSnip",
-    config = function(plugin, opts)
-      require "astronvim.plugins.configs.luasnip"(plugin, opts) -- include the default astronvim config that calls the setup call
-      -- add more custom luasnip configuration such as filetype extend or custom snippets
-      local luasnip = require "luasnip"
-      luasnip.filetype_extend("javascript", { "javascriptreact" })
+    "jay-babu/mason-nvim-dap.nvim",
+    optional = true,
+    opts = function(_, opts)
+      opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "codelldb" })
     end,
   },
-
   {
-    "windwp/nvim-autopairs",
-    config = function(plugin, opts)
-      require "astronvim.plugins.configs.nvim-autopairs"(plugin, opts) -- include the default astronvim config that calls the setup call
-      -- add more custom autopairs configuration such as custom rules
-      local npairs = require "nvim-autopairs"
-      local Rule = require "nvim-autopairs.rule"
-      local cond = require "nvim-autopairs.conds"
-      npairs.add_rules(
-        {
-          Rule("$", "$", { "tex", "latex" })
-            -- don't add a pair if the next character is %
-            :with_pair(cond.not_after_regex "%%")
-            -- don't add a pair if  the previous character is xxx
-            :with_pair(
-              cond.not_before_regex("xxx", 3)
-            )
-            -- don't move right when repeat character
-            :with_move(cond.none())
-            -- don't delete if the next character is xx
-            :with_del(cond.not_after_regex "xx")
-            -- disable adding a newline when you press <cr>
-            :with_cr(cond.none()),
-        },
-        -- disable for .vim files, but it work for another filetypes
-        Rule("a", "a", "-vim")
-      )
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    optional = true,
+    opts = function(_, opts)
+      opts.ensure_installed = require("astrocore").list_insert_unique(opts.ensure_installed, { "codelldb" })
     end,
+  },
+  {
+    "Saecki/crates.nvim",
+    event = { "BufRead Cargo.toml" },
+    opts = {
+      completion = {
+        crates = { enabled = true },
+      },
+      lsp = {
+        enabled = true,
+        on_attach = function(...) require("astrolsp").on_attach(...) end,
+        actions = true,
+        completion = true,
+        hover = true,
+      },
+    },
+  },
+  {
+    "nvim-neotest/neotest",
+    optional = true,
+    opts = function(_, opts)
+      if not opts.adapters then opts.adapters = {} end
+      local rustaceanvim_avail, rustaceanvim = pcall(require, "rustaceanvim.neotest")
+      if rustaceanvim_avail then table.insert(opts.adapters, rustaceanvim) end
+    end,
+  },
+  {
+    "mrcjkb/rustaceanvim",
+    version = vim.fn.has "nvim-0.11" == 1 and "^6" or "^5",
+    ft = "rust",
+    specs = {
+      {
+        "AstroNvim/astrolsp",
+        optional = true,
+        ---@type AstroLSPOpts
+        opts = {
+          handlers = { rust_analyzer = false }, -- disable setup of `rust_analyzer`
+        },
+      },
+    },
+    opts = function()
+      local adapter
+      local codelldb_installed = pcall(function() return require("mason-registry").get_package "codelldb" end)
+      local cfg = require "rustaceanvim.config"
+      if codelldb_installed then
+        local codelldb_path = vim.fn.exepath "codelldb"
+        local this_os = vim.uv.os_uname().sysname
+
+        local liblldb_path = vim.fn.expand "$MASON/share/lldb"
+        -- The path in windows is different
+        if this_os:find "Windows" then
+          liblldb_path = liblldb_path .. "\\bin\\lldb.dll"
+        else
+          -- The liblldb extension is .so for linux and .dylib for macOS
+          liblldb_path = liblldb_path .. "/lib/liblldb" .. (this_os == "Linux" and ".so" or ".dylib")
+        end
+        adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path)
+      else
+        adapter = cfg.get_codelldb_adapter()
+      end
+
+      local astrolsp_avail, astrolsp = pcall(require, "astrolsp")
+      local astrolsp_opts = (astrolsp_avail and astrolsp.lsp_opts "rust_analyzer") or {}
+      local server = {
+        ---@type table | (fun(project_root:string|nil, default_settings: table|nil):table) -- The rust-analyzer settings or a function that creates them.
+        settings = function(project_root, default_settings)
+          local astrolsp_settings = astrolsp_opts.settings or {}
+
+          local merge_table = require("astrocore").extend_tbl(default_settings or {}, astrolsp_settings)
+          local ra = require "rustaceanvim.config.server"
+          -- load_rust_analyzer_settings merges any found settings with the passed in default settings table and then returns that table
+          return ra.load_rust_analyzer_settings(project_root, {
+            settings_file_pattern = "rust-analyzer.json",
+            default_settings = merge_table,
+          })
+        end,
+      }
+      local final_server = require("astrocore").extend_tbl(astrolsp_opts, server)
+      return {
+        server = final_server,
+        dap = { adapter = adapter, load_rust_types = true },
+        tools = { enable_clippy = false },
+      }
+    end,
+    config = function(_, opts) vim.g.rustaceanvim = require("astrocore").extend_tbl(opts, vim.g.rustaceanvim) end,
   },
 }
